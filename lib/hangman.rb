@@ -2,8 +2,9 @@
 
 require_relative 'hangman/display'
 require_relative 'hangman/utils'
-require_relative 'hangman/engine'
 require_relative 'hangman/state'
+
+require 'readline'
 
 module Hangman
   class Game
@@ -24,7 +25,7 @@ module Hangman
         option = gets.to_i
 
         new_game if option == 1
-        load_game('path/to/game') if option == 2
+        load_game(Readline.readline('Enter file name: ').strip) if option == 2
 
         break if option.between?(1, 2)
 
@@ -40,6 +41,8 @@ module Hangman
 
     def load_game(file_path)
       puts "Loading a game path=#{file_path}..."
+      state = State.unserialize(File.read(file_path))
+      play(state)
     end
 
     def save_game(state)
@@ -50,7 +53,7 @@ module Hangman
       File.open(filename, 'w') do |file|
         file.puts state.serialize
       end
-      puts "Saving in #{filename}"
+      puts "Saving in #{filename}\n\n"
     end
 
     private
@@ -62,12 +65,16 @@ module Hangman
 
     def play(state)
       loop do
-        save_game(state)
         state.info
+
         break puts "You Win! CONGRATULATIONS !!! Correct word = #{state.secret_word}\n\n" if state.win?
         break puts "You Lose! You are out of guesses! Correct word = #{state.secret_word}\n\n" if state.out_of_guesses?
 
         state.update(guess_a_letter)
+
+        puts "\nWould you like to save the game? 1 - yes ; other - NO\n"
+        option = gets.to_i
+        break save_game(state) if option == 1
       end
     end
   end

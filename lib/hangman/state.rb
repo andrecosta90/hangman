@@ -1,15 +1,15 @@
 # frozen_string_literal: true
-require_relative 'serializable'
+
+require 'json'
 
 module Hangman
   class State
-    include BasicSerializable
     attr_reader :correct_letters, :incorrect_letters, :max_guesses
 
-    def initialize(secret_word, max_guesses = 6)
+    def initialize(secret_word, max_guesses = 6, correct_letters = nil, incorrect_letters = nil)
       @secret_word = secret_word
-      @correct_letters = Array.new(secret_word.length, '_') # state
-      @incorrect_letters = [] # state
+      @correct_letters = correct_letters || Array.new(secret_word.length, '_') # state
+      @incorrect_letters = incorrect_letters || [] # state
       @max_guesses = max_guesses
     end
 
@@ -26,7 +26,7 @@ module Hangman
     end
 
     def secret_word
-      return @secret_word if out_of_guesses?
+      return @secret_word if out_of_guesses? || win?
 
       '*****'
     end
@@ -40,6 +40,30 @@ module Hangman
       puts "\n#'s of incorrect guesses remaining: #{max_guesses - incorrect_letters.length}"
       puts "Incorrect letters: [#{incorrect_letters.join(', ')}]\n\n"
       puts "===========================================================\n\n"
+    end
+
+    def to_s
+      "@secret_word=#{secret_word}, " \
+        "@correct_letters=#{correct_letters}, " \
+        "@incorrect_letters=#{incorrect_letters}, " \
+        "@max_guesses=#{max_guesses}>"
+    end
+
+    def serialize
+      JSON.dump({
+                  secret_word: @secret_word,
+                  max_guesses: @max_guesses,
+                  correct_letters: @correct_letters,
+                  incorrect_letters: @incorrect_letters
+                })
+    end
+
+    def self.unserialize(string)
+      data = JSON.parse string
+      new(data['secret_word'],
+          data['max_guesses'],
+          data['correct_letters'],
+          data['incorrect_letters'])
     end
   end
 end
