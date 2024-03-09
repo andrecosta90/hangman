@@ -16,13 +16,24 @@ max_guesses = 6
 
 # 2.1 your script should load in the dictionary
 # 2.2 and randomly select a word between 5 and 12 characters long for the secret word
-# dictionary = load_dictionary
+dictionary = load_dictionary
 # p dictionary.length
-secret_word = 'programming'.upcase #state
-correct_letters = Array.new(secret_word.length, '_') #state
-incorrect_letters = [] #state
+secret_word = 'programming'.upcase # state
+secret_word = dictionary.sample
+correct_letters = Array.new(secret_word.length, '_') # state
+incorrect_letters = [] # state
 
 loop do
+  puts "\nCorrect letters: #{correct_letters.join(' ')}  ::  (##{correct_letters.length} letters)"
+  puts "\n#'s of incorrect guesses remaining: #{max_guesses - incorrect_letters.length}"
+  puts "Incorrect letters: [#{incorrect_letters.join(', ')}]\n\n"
+  puts "===========================================================\n\n"
+
+  break puts 'You Win! CONGRATULATIONS !!! \n\n' if secret_word == correct_letters.join('')
+  if incorrect_letters.length == max_guesses
+    break puts "You Lose! You are out of guesses! Correct word = #{secret_word}\n\n"
+  end
+
   print 'Guess one letter: '
   letter = gets.chomp.upcase
   if secret_word.include?(letter)
@@ -30,11 +41,4 @@ loop do
   else
     incorrect_letters.push(letter)
   end
-
-  puts "\nCorrect letters: #{correct_letters.join(' ')}"
-  puts "\n#'s of incorrect guesses remaining: #{max_guesses - incorrect_letters.length}"
-  puts "Incorrect letters: [#{incorrect_letters.join(', ')}]\n\n"
-
-  break puts "\nYou Win!" if secret_word == correct_letters.join('')
-  break puts "\nYou Lose! You are out of guesses!" if incorrect_letters.length == max_guesses
 end
